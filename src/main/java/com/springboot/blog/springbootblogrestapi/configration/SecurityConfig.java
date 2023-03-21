@@ -60,6 +60,7 @@ public class SecurityConfig {
         http.csrf().disable().cors().configurationSource(request -> corsConfiguration).and().authorizeHttpRequests((authorize)->{
                     authorize.requestMatchers(HttpMethod.GET,"/api/posts").permitAll()
                             .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers("/image/**").permitAll()
                             .anyRequest().authenticated();
                 }).exceptionHandling(exception-> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

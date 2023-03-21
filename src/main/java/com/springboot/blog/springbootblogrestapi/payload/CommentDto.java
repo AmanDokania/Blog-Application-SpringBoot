@@ -28,4 +28,6 @@ public class CommentDto {
     @Size(min = 10,message = "body should contain at least 10 character")
     private String body;
 
+    private String profileImage;
+
 }

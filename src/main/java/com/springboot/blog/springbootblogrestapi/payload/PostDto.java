@@ -22,6 +22,9 @@ public class PostDto {
     @Size(min = 10,message = "description should have at least 10 character")
     private String description;
 
+    private String image;
+    private String profileImage;
+
     private String createdBy ;
 
     private String createDate ;
@@ -34,4 +37,5 @@ public class PostDto {
     private Set<CommentDto> comments;
 
     private Long categoryId;
+
 }

@@ -2,16 +2,18 @@ package com.springboot.blog.springbootblogrestapi.service.Impl;
 
 import com.springboot.blog.springbootblogrestapi.entity.Comment;
 import com.springboot.blog.springbootblogrestapi.entity.Post;
+import com.springboot.blog.springbootblogrestapi.entity.User;
 import com.springboot.blog.springbootblogrestapi.exception.BlogAPiException;
 import com.springboot.blog.springbootblogrestapi.exception.ResourceNotFoundException;
 import com.springboot.blog.springbootblogrestapi.mapper.CommentMapper;
-import com.springboot.blog.springbootblogrestapi.mapper.Mapper;
 import com.springboot.blog.springbootblogrestapi.payload.CommentDto;
 import com.springboot.blog.springbootblogrestapi.repository.CommentRepository;
 import com.springboot.blog.springbootblogrestapi.repository.PostRepositroy;
+import com.springboot.blog.springbootblogrestapi.repository.UserRepository;
 import com.springboot.blog.springbootblogrestapi.service.CommentService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,13 +25,20 @@ public class CommentServiceImpl implements CommentService {
 
     private CommentRepository commentRepository;
     private PostRepositroy postRepositroy;
+
+    private UserRepository userRepository;
     @Override
     public CommentDto createComment(Long postId, CommentDto commentDto) {
         Comment comment= CommentMapper.COMMENT_MAPPER.mapToComment(commentDto);
 
-        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",postId));
+        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",String.valueOf(postId)));
+
+        String username= SecurityContextHolder.getContext().getAuthentication().getName();
+        User user=userRepository.findByUsername(username).orElseThrow(()-> new ResourceNotFoundException("User", "id", username));
+
 
         comment.setPost(post);
+        comment.setProfileImage(user.getProfileImage());
         Comment newComment = commentRepository.save(comment);
         System.out.println(post);
 
@@ -45,9 +54,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto getCommentById(Long postId, Long commentId) {
-        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",postId));
+        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",String.valueOf(postId)));
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new ResourceNotFoundException("comment","id",commentId));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new ResourceNotFoundException("comment","id",String.valueOf(commentId)));
 
         if(!comment.getPost().getId().equals(post.getId()))
             throw new BlogAPiException(HttpStatus.BAD_REQUEST,"comment doesn't belong to post");
@@ -57,9 +66,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto updateComment(Long postId, Long commentId, CommentDto commentDto) {
-        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",postId));
+        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",String.valueOf(postId)));
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new ResourceNotFoundException("comment","id",commentId));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new ResourceNotFoundException("comment","id",String.valueOf(commentId)));
 
         if(!comment.getPost().getId().equals(post.getId()))
             throw new BlogAPiException(HttpStatus.BAD_REQUEST,"comment doesn't belong to post");
@@ -74,9 +83,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long postId, Long commentId) {
-        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",postId));
+        Post post= postRepositroy.findById(postId).orElseThrow(()->new ResourceNotFoundException("post","id",String.valueOf(postId)));
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new ResourceNotFoundException("comment","id",commentId));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new ResourceNotFoundException("comment","id",String.valueOf(commentId)));
 
         if(!comment.getPost().getId().equals(post.getId()))
             throw new BlogAPiException(HttpStatus.BAD_REQUEST,"comment doesn't belong to post");

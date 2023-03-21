@@ -19,6 +19,8 @@ public class Comment extends Auditable {
 //    private String email;
     private String body;
 
+    private String profileImage;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;

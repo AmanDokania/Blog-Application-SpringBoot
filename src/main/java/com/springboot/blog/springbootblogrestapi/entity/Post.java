@@ -25,6 +25,9 @@ public class Post extends Auditable{
     @Column(name = "description",nullable = false)
     private String description;
 
+    private String image;
+    private String profileImage;
+
     @OneToMany(mappedBy = "post",cascade = CascadeType.ALL)
     private Set<Comment> comments=new HashSet<>();
 

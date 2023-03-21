@@ -1,16 +1,12 @@
 package com.springboot.blog.springbootblogrestapi.mapper;
 
 
-import com.springboot.blog.springbootblogrestapi.entity.Comment;
 import com.springboot.blog.springbootblogrestapi.entity.Post;
-import com.springboot.blog.springbootblogrestapi.payload.CommentDto;
 import com.springboot.blog.springbootblogrestapi.payload.PostDto;
 import com.springboot.blog.springbootblogrestapi.payload.RegisterDto;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-
-@org.mapstruct.Mapper
 public interface Mapper {
 
     Mapper MAPPER = Mappers.getMapper(Mapper.class);

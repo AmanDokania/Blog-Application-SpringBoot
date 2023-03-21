@@ -1,16 +1,29 @@
 package com.springboot.blog.springbootblogrestapi.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.springboot.blog.springbootblogrestapi.entity.Image;
 import com.springboot.blog.springbootblogrestapi.payload.PostDto;
 import com.springboot.blog.springbootblogrestapi.payload.PostResponse;
+import com.springboot.blog.springbootblogrestapi.payload.RegisterDto;
+import com.springboot.blog.springbootblogrestapi.repository.ImageRepositroy;
 import com.springboot.blog.springbootblogrestapi.service.PostService;
 import com.springboot.blog.springbootblogrestapi.util.AppConstants;
+import com.springboot.blog.springbootblogrestapi.util.ImageUtil;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @RestController
@@ -20,10 +33,30 @@ public class PostController {
 
     private PostService postService;
 
+    private ImageRepositroy imageRepositroy;
+
+    private ObjectMapper objectMapper;
+
 //    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<PostDto> createPost(@Valid  @RequestBody  PostDto postDto){
         System.out.println(postDto.toString());
+        return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/v2")
+    public ResponseEntity<PostDto> createPostV2(@Valid @RequestParam("data") String data,
+                                                @RequestParam("file") MultipartFile file) throws IOException {
+
+        Image image =imageRepositroy.save(Image.builder()
+                .name(System.currentTimeMillis()+file.getOriginalFilename())
+                .type(file.getContentType())
+                .imageData(ImageUtil.compressImage(file.getBytes())).build());
+
+        // converting string to json
+        PostDto postDto = objectMapper.readValue(data, PostDto.class);
+        postDto.setImage(image.getName());
+
         return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
     }
 

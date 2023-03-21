@@ -49,7 +49,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String register(RegisterDto registerDto) {
 
-        System.out.println(registerDto.getEmail()+" "+registerDto.getUserName()+" "+registerDto.getProfileImage());
+//        System.out.println(registerDto.getEmail()+" "+registerDto.getUserName()+" "+registerDto.getProfileImage());
+
         // check if user is exists by username
         if(userRepository.existsByUsername(registerDto.getUserName()))
             throw new BlogAPiException(HttpStatus.BAD_REQUEST,"Username is already exist");
@@ -61,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setUsername(registerDto.getUserName());
-        user.setProfileImage(registerDto.getProfileImage());
+        user.setProfileImage("http://localhost:8080/image/"+registerDto.getProfileImage());
         System.out.println(user.getUsername()+" "+user.getEmail()+" "+user.getProfileImage());
         Set<Role> roles=new HashSet<>();
 
@@ -86,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
         UserDetailsDto userDetailsDto = new UserDetailsDto();
         userDetailsDto.setEmail(user.getEmail());
         userDetailsDto.setName(user.getName());
-        userDetailsDto.setProfileImage(AppConstants.LOCAL_PATH_IMAGE+user.getProfileImage());
+        userDetailsDto.setProfileImage(user.getProfileImage());
         userDetailsDto.setRoles(user.getRoles());
         userDetailsDto.setUsername(user.getUsername());
         System.out.println(user.getUsername()+" "+user.getEmail()+" "+userDetailsDto.getProfileImage());

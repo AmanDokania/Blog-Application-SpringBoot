@@ -1,11 +1,14 @@
 package com.springboot.blog.springbootblogrestapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.springboot.blog.springbootblogrestapi.mapper.Mapper;
+import com.springboot.blog.springbootblogrestapi.entity.Image;
+
 import com.springboot.blog.springbootblogrestapi.payload.JwtAuthResponse;
 import com.springboot.blog.springbootblogrestapi.payload.LoginDto;
 import com.springboot.blog.springbootblogrestapi.payload.RegisterDto;
+import com.springboot.blog.springbootblogrestapi.repository.ImageRepositroy;
 import com.springboot.blog.springbootblogrestapi.service.AuthService;
+import com.springboot.blog.springbootblogrestapi.util.ImageUtil;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +40,9 @@ public class AuthController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ImageRepositroy imageRepositroy;
 
     @PostMapping(value = {"/login","/signin"})
     private ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto){
@@ -63,18 +70,18 @@ public class AuthController {
          String name=file.getOriginalFilename();
 
          // get random string
-        String random= UUID.randomUUID().toString();
+      //  String random= UUID.randomUUID().toString();
 
         System.out.println(name.substring(name.lastIndexOf(".")));
-        random=random+(name.substring(name.lastIndexOf(".")));
-        String fullpath=path+File.separator+random;
-        File f=new File(path);
-        System.out.println(f.exists());
-        if(!f.exists()){
-            f.mkdir();
-        }
-//        // File path
-//        String UPLOAD_DIR = new ClassPathResource("public/images").getFile().getAbsolutePath();
+//        random=random+(name.substring(name.lastIndexOf(".")));
+//        String fullpath=path+File.separator+random;
+//        File f=new File(path);
+//        System.out.println(f.exists());
+//        if(!f.exists()){
+//            f.mkdir();
+//        }
+        // File path
+//        String UPLOAD_DIR = new ClassPathResource("static/images/").getFile().getAbsolutePath();
 //
 //
 //        String fileName =  (  "" + System.currentTimeMillis() + file.getOriginalFilename() );
@@ -87,6 +94,11 @@ public class AuthController {
 //                .path(fileName).toUriString();
 
 
+        Image image =imageRepositroy.save(Image.builder()
+                .name(System.currentTimeMillis()+file.getOriginalFilename())
+                .type(file.getContentType())
+                .imageData(ImageUtil.compressImage(file.getBytes())).build());
+
         // converting string to json
         RegisterDto registerDto = objectMapper.readValue(data, RegisterDto.class);
 
@@ -95,10 +107,10 @@ public class AuthController {
       //  RegisterDto registerDto = Mapper.MAPPER.mapToRegisterDto(data);
 //        System.out.println(registerDto.getEmail()+" "+registerDto.getName());
 //        System.out.println(fullpath);
-        registerDto.setProfileImage(fullpath);
+        registerDto.setProfileImage(image.getName());
 
         String response = authService.register(registerDto);
-        Files.copy(file.getInputStream(),Paths.get(fullpath),StandardCopyOption.REPLACE_EXISTING);
+//        Files.copy(file.getInputStream(),Paths.get(fullpath),StandardCopyOption.REPLACE_EXISTING);
         return ResponseEntity.ok(response);
     }
 
